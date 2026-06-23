@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사상체질 유형 진단</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+  :root {
+    --soyang:  #E8651A;
+    --taeyang: #C0392B;
+    --soeum:   #2471A3;
+    --taeum:   #1E8449;
+    --bg: #F7F4EF;
+    --card: #FFFFFF;
+    --text: #1a1a1a;
+    --muted: #666;
+    --border: #E0DDD8;
+    --accent: #3D2B1F;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── 헤더 ── */
+  .hero {
+    background: var(--accent);
+    color: #fff;
+    text-align: center;
+    padding: 3rem 1.5rem 2.5rem;
+  }
+  .hero-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #C8B99A;
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0.75rem;
+  }
+  .hero p {
+    font-size: 0.95rem;
+    color: #C8B99A;
+    line-height: 1.7;
+  }
+
+  /* ── 탭 ── */
+  .tabs {
+    display: flex;
+    background: var(--accent);
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    background: transparent;
+    color: #C8B99A;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+  }
+  .tab-btn.active {
+    color: #fff;
+    border-bottom-color: #E8651A;
+  }
+  .tab-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── 메인 ── */
+  .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+  /* ── 섹션 제목 ── */
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--accent);
+  }
+  .section-head .badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+  .section-head h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  /* ── 안내문 ── */
+  .guide-box {
+    background: #FFF8F0;
+    border-left: 4px solid var(--soyang);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── 카테고리 구분 ── */
+  .cat-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--soyang);
+    text-transform: uppercase;
+    margin: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .cat-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── 문항 카드 ── */
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    transition: box-shadow 0.15s;
+  }
+  .q-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+
+  .q-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+  .q-num {
+    min-width: 28px;
+    height: 28px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .q-text {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    font-weight: 400;
+    padding-top: 3px;
+  }
+
+  /* ── 점수 버튼 ── */
+  .score-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+  .score-btn {
+    flex: 1;
+    max-width: 120px;
+    padding: 0.5rem 0.25rem;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.82rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .score-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .score-btn.selected-2 {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 700;
+  }
+  .score-btn.selected-1 {
+    background: #C8B99A;
+    border-color: #C8B99A;
+    color: #fff;
+    font-weight: 700;
+  }
+  .score-btn.selected-0 {
+    background: #EEE;
+    border-color: #CCC;
+    color: #999;
+    font-weight: 700;
+  }
+
+  /* ── 행동유형(뒷면) ── */
+  .back-q {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+  .back-q-title {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .back-q-title .qn {
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .back-choices { padding: 0.5rem 0; }
+  .back-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.7rem 1.25rem;
+    cursor: pointer;
+    transition: background 0.12s;
+    border-bottom: 1px solid var(--border);
+  }
+  .back-choice:last-child { border-bottom: none; }
+  .back-choice:hover { background: #F7F4EF; }
+  .back-choice.selected { background: #FFF3E8; }
+  .choice-sym {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.12s;
+    color: var(--muted);
+  }
+  .back-choice.selected .choice-sym {
+    background: var(--soyang);
+    border-color: var(--soyang);
+    color: #fff;
+  }
+  .choice-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    padding-top: 4px;
+    color: var(--text);
+  }
+
+  /* ── 진행바 ── */
+  .progress-wrap {
+    margin-bottom: 2rem;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--soyang);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  /* ── 버튼 ── */
+  .btn-wrap { text-align: center; margin-top: 2.5rem; }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 0.9rem 3rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    padding: 0.8rem 2rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-right: 1rem;
+  }
+
+  /* ── 결과 ── */
+  .result-hero {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.08;
+    background: repeating-linear-gradient(
+      45deg, currentColor, currentColor 1px, transparent 1px, transparent 12px
+    );
+  }
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    opacity: 0.7;
+  }
+  .result-type {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .result-sub {
+    font-size: 1.1rem;
+    opacity: 0.85;
+    margin-bottom: 1.5rem;
+  }
+  .score-chips {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .score-chip {
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: rgba(255,255,255,0.25);
+  }
+  .score-chip.top { background: rgba(255,255,255,0.4); font-size: 0.9rem; }
+
+  .result-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .result-card h3 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--soyang);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+  }
+  .result-card p {
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: var(--text);
+  }
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+  .tag {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .combo-box {
+    background: var(--card);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .combo-box h3 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--accent);
+  }
+  .combo-box p {
+    font-size: 0.93rem;
+    line-height: 1.8;
+    color: var(--text);
+  }
+
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .type-mini {
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .type-mini h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .type-mini p { font-size: 0.8rem; line-height: 1.6; color: var(--muted); }
+
+  .btn-restart {
+    display: block;
+    margin: 2rem auto 0;
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    padding: 0.8rem 2.5rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .hidden { display: none; }
+
+  @media (max-width: 600px) {
+    .score-row { gap: 0.35rem; }
+    .score-btn { font-size: 0.75rem; padding: 0.45rem 0.15rem; }
+    .type-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">사상체질 · 四象體質</div>
+  <h1>나의 체질과 행동유형<br>진단 검사</h1>
+  <p>타고난 체질(신체)과 후천적 행동성향(심리)을<br>함께 알아보는 종합 진단입니다.</p>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" id="tab1" onclick="showTab(1)">① 체질 진단 (40문항)</button>
+  <button class="tab-btn" id="tab2" onclick="showTab(2)" disabled>② 행동유형 (10문항)</button>
+  <button class="tab-btn" id="tab3" onclick="showTab(3)" disabled>③ 결과 보기</button>
+</div>
+
+<!-- ════════════ 탭1: 체질 진단 ════════════ -->
+<div id="page1" class="container">
+  <div class="section-head">
+    <span class="badge">PART 1</span>
+    <h2>타고난 체질 진단</h2>
+  </div>
+  <div class="guide-box">
+    각 문항을 읽고 나에게 해당하는 정도를 선택해주세요.<br>
+    <strong>일치 2점 / 보통 1점 / 불일치 0점</strong>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span>진행률</span><span id="prog1-text">0 / 40</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog1-fill" style="width:0%"></div></div>
+  </div>
+
+  <div id="q-front"></div>
+
+  <div class="btn-wrap">
+    <button class="btn-primary" onclick="goToBack()">다음 → 행동유형 진단</button>
+  </div>
+</div>
+
+<!-- ════════════ 탭2: 행동유형 ════════════ -->
+<div id="page2" class="container hidden">
+  <div class="section-head">
+    <span class="badge">PART 2</span>
+    <h2>후천적 행동유형 진단</h2>
+  </div>
+  <div class="guide-box">
+    각 문항에서 <strong>나와 가장 가까운 것 하나</strong>만 선택해주세요.
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span>진행률</span><span id="prog2-text">0 / 10</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog2-fill" style="width:0%"></div></div>
+  </div>
+
+  <div id="q-back"></div>
+
+  <div class="btn-wrap">
+    <button class="btn-secondary" onclick="showTab(1)">← 이전</button>
+    <button class="btn-primary" onclick="showResult()">결과 보기 →</button>
+  </div>
+</div>
+
+<!-- ════════════ 탭3: 결과 ════════════ -->
+<div id="page3" class="container hidden">
+  <div id="result-area"></div>
+  <button class="btn-restart" onclick="restart()">↺ 다시 진단하기</button>
+</div>
+
+<script>
+// ════════════ 데이터 ════════════
+
+const frontQuestions = [
+  { n:1,  text:"오래 달리기를 해 본 경험이 있고, 달리기를 즐기는 편이다.", type:'나' },
+  { n:2,  text:"더위를 많이 타는 편이라서 더운 여름이 너무 힘들다.", type:'가' },
+  { n:3,  text:"땀을 흘리고 나면 상쾌해져서 찜질방이나 사우나를 즐기는 편이다.", type:'라' },
+  { n:4,  text:"추위를 아주 많이 타서 추운 겨울이 너무 힘들다.", type:'다' },
+  { n:5,  text:"몸에 살이 쉽게 찌는 편이며, 운동을 멈추면 더 쉽게 살이 찐다.", type:'라' },
+  { n:6,  text:"평소에 몸에 열이 많고 늘 몸이 뜨거운 편이다.", type:'가' },
+  { n:7,  text:"활동 후 쉽게 피곤해지고, 잠을 충분히 자야 회복되는 편이다.", type:'다' },
+  { n:8,  text:"기관지와 폐 기능이 좋아서 기침 감기는 거의 걸리지 않는다.", type:'나' },
+  { n:9,  text:"운동을 좋아하며, 조금만 해도 근육이 잘 잡히는 편이다.", type:'가' },
+  { n:10, text:"땀이 잘 나지 않으며 몸이 건조한 편이다. (몸에 수분이 적다.)", type:'나' },
+  { n:11, text:"몸에 땀이 많고 습기가 많은 편이다. (몸에 수분이 많다.)", type:'라' },
+  { n:12, text:"몸이 대체로 마른 편이며, 살이 쉽게 찌지 않는다.", type:'나' },
+  { n:13, text:"몸에 비하여 목이 굵은 편이며, 머리가 몸에 비해 큰 편이다.", type:'가' },
+  { n:14, text:"몸에 지방이 많은 편이며, 살이 찔 때 하체나 배부터 살이 찐다.", type:'라' },
+  { n:15, text:"달리기를 하면 숨이 많이 차서 달리기를 싫어하는 편이다.", type:'나' },
+  { n:16, text:"몸무게의 변화가 심한 편이다. (쉽게 줄었다 늘었다 한다.)", type:'가' },
+  { n:17, text:"여름에 답답해서 이불을 덮지 않고 잔다. (시원하게 잔다.)", type:'가' },
+  { n:18, text:"여름에도 이불을 꼭 덮고 잔다. (늘 따뜻하게 잔다.)", type:'다' },
+  { n:19, text:"손발이 차가운 편이며, 따뜻한 음식이나 죽을 좋아하는 편이다.", type:'다' },
+  { n:20, text:"평소에 몸에 열이 별로 없고 차가운 편이다. (냉한 체질)", type:'다' },
+  { n:21, text:"고기나 튀김, 중식류처럼 기름진 음식을 좋아하는 편이다.", type:'라' },
+  { n:22, text:"고기나 튀김, 중식류처럼 기름진 음식을 부담스러워하거나 싫어하는 편이다.", type:'나' },
+  { n:23, text:"비위가 좋은 편이라 날음식, 회, 육회, 생간 등을 비교적 잘 먹는 편이다.", type:'라' },
+  { n:24, text:"식사량이 많은 편이고, 음식 종류를 크게 가리지 않는다.", type:'라' },
+  { n:25, text:"식사량이 적은 편이고, 좋아하는 음식 위주로 먹는 편이다. (편식)", type:'다' },
+  { n:26, text:"찬 음식을 좋아하고, 차가운 음식을 먹어도 탈이 잘 나지 않는다.", type:'가' },
+  { n:27, text:"소화력이 약한 편이며, 신경을 쓰거나 스트레스를 받으면 소화가 더 잘 안 된다.", type:'다' },
+  { n:28, text:"비위가 약해 냄새에 예민하고, 멀미를 심하게 하는 편이다.", type:'다' },
+  { n:29, text:"술을 비교적 잘 마시고, 마신 뒤 회복이 빠른 편이다.", type:'라' },
+  { n:30, text:"술을 거의 마시지 못하거나, 마시면 해독이 잘 안 되어 오래 힘들다.", type:'나' },
+  { n:31, text:"몸이 좋지 않을 때 땀이 잘 나지 않고, 몸이 축 가라앉는 편이다.", type:'나' },
+  { n:32, text:"몸이 좋지 않으면 소화가 잘 안 되거나 설사를 하는 일이 잦다.", type:'다' },
+  { n:33, text:"몸이 좋지 않으면 소변이 시원하지 않거나 불편해지는 편이다.", type:'가' },
+  { n:34, text:"몸이 좋지 않으면 변비가 생기거나 배변이 불편해지는 편이다.", type:'라' },
+  { n:35, text:"감기에 걸리면 목부터 불편하고, 기침을 많이 하는 편이다.", type:'라' },
+  { n:36, text:"뒷목이 자주 뻐근하거나 당기는 증상이 있는 편이다.", type:'나' },
+  { n:37, text:"피곤하면 다리에 힘이 빠지고, 편히 쉬고 싶어지는 편이다.", type:'나' },
+  { n:38, text:"피로할 때 잠보다는 조용히 쉬면서 회복하는 편이다.", type:'가' },
+  { n:39, text:"큰소리에도 잘 놀라지 않고, 무서움을 별로 타지 않는 편이다.", type:'가' },
+  { n:40, text:"큰소리에 잘 놀라고, 무서움을 많이 타며 겁이 많은 편이다.", type:'다' },
+];
+
+const categories = [
+  { label:"신체·체형", range:[1,20] },
+  { label:"음식·소화", range:[21,30] },
+  { label:"몸 상태·증상", range:[31,38] },
+  { label:"심리 기질", range:[39,40] },
+];
+
+const backQuestions = [
+  { n:1, title:"내가 생각하기에 나는 누구인가?", choices:[
+    { sym:"①", text:"인생을 재미있고 즐겁게 사는 것이 가장 중요하며, 사람들과 어울리는 것을 좋아한다." },
+    { sym:"②", text:"내가 하는 일에서 최고로 인정받고 싶고, 최고의 성과를 위해 열심히 달린다." },
+    { sym:"③", text:"내 인생의 목적과 꿈을 정해서 움직이며, 목표를 반드시 이루고자 한다." },
+    { sym:"④", text:"이 세상에 사랑과 희망을 전파하고, 나보다 타인을 우선적으로 돕고자 한다." },
+  ]},
+  { n:2, title:"내 마음을 보여주는 단어가 가장 많은 것은?", choices:[
+    { sym:"①", text:"재미 / 재치 / 여행 / 유머 / 행복 / 즐거움 / 호기심 / 아들" },
+    { sym:"②", text:"현실 / 힘 / 열정 / 실행 / 책임감 / 왕 / 현재 / 아버지" },
+    { sym:"③", text:"인내 / 섬세 / 약속 / 결실 / 고독 / 기억 / 과거 / 딸" },
+    { sym:"④", text:"사랑 / 용서 / 바다 / 정신 / 감사 / 여신 / 봉사 / 어머니" },
+  ]},
+  { n:3, title:"내가 인생을 살아가는 목적은 무엇인가?", choices:[
+    { sym:"①", text:"나와 우리 가족이 함께 행복하고 즐거운 세상을 만들며 오래오래 재미있게 살고 싶다." },
+    { sym:"②", text:"내가 하는 일에서 누구의 간섭 없이 오직 내 힘으로 최고가 되는 것이 목적이다." },
+    { sym:"③", text:"내가 맡은 일에 책임감과 인내심을 갖고 끝까지 완수하는 것이 목적이다." },
+    { sym:"④", text:"타인을 이해하고 배려하며 그들과 공감·소통하고 함께 행복하게 사는 것이 목적이다." },
+  ]},
+  { n:4, title:"나의 업무나 일에 있어서의 태도는?", choices:[
+    { sym:"①", text:"일단 시작하고 일을 크게 벌리는 편이지만, 마무리가 다소 약한 편이다." },
+    { sym:"②", text:"한번 시작한 일은 물러서지 않으며, 주도적으로 혼자 밀고 나가는 스타일이다." },
+    { sym:"③", text:"추진력은 부족하더라도 맡은 일의 끝마무리를 철저히 해서 인정받는 편이다." },
+    { sym:"④", text:"복잡한 일의 순서 정하기가 어렵고, 타인의 부탁을 거절하지 못해 정작 내 일이 늦어진다." },
+  ]},
+  { n:5, title:"내 마음을 보여주는 단어가 가장 많은 것은?", choices:[
+    { sym:"①", text:"시작 / 미래 / 봄 / 기쁨 / 긍정 / 노래 / 자유 / 대화" },
+    { sym:"②", text:"열의 / 최고 / 여름 / 자신감 / 행동 / 결단 / 속도 / 우승" },
+    { sym:"③", text:"원칙 / 논리 / 가을 / 신중 / 완벽 / 윤리 / 도덕 / 증거" },
+    { sym:"④", text:"초월 / 유연성 / 겨울 / 눈물 / 지혜 / 배려 / 감성 / 영성" },
+  ]},
+  { n:6, title:"나는 어떤 사람인가?", choices:[
+    { sym:"①", text:"오늘을 즐기기 위해 일과를 빨리 끝내고 친한 사람들과 어울리며 재미를 추구한다." },
+    { sym:"②", text:"남들이 인정하는 분야에서 최고가 되기 위해 항상 열심히 전진하며 산다." },
+    { sym:"③", text:"매사에 완벽함과 철저함을 추구하여 나 자신을 힘들게 하지만, 이런 내 모습이 좋다." },
+    { sym:"④", text:"마음은 넓은 것 같으나, 내가 어떤 사람인지 생각할수록 잘 모르겠다는 생각이 든다." },
+  ]},
+  { n:7, title:"내가 느끼는 단점은?", choices:[
+    { sym:"①", text:"매사에 호기심이 너무 많아 집중이 어렵고, 즐겁고 재미있는 것만 좇는 경향이 있다." },
+    { sym:"②", text:"타인과 비교할 때 상대방이 너무 느리고 답답하다는 우월감을 느낄 때가 있다." },
+    { sym:"③", text:"남에게 피해 주기도, 도움 받기도 싫어서 대인관계가 좁고 외로울 때가 있다." },
+    { sym:"④", text:"화가 나도 겉으로 표현하지 못하고 속으로 삭이다가 스트레스가 쌓이는 편이다." },
+  ]},
+  { n:8, title:"내가 느끼는 장점은?", choices:[
+    { sym:"①", text:"기발한 아이디어와 재치·유머가 넘쳐서 어디서든 분위기를 활기차게 만든다." },
+    { sym:"②", text:"문제가 생기면 즉시 해결하며, 군더더기 없이 빠르고 효율적으로 살아간다." },
+    { sym:"③", text:"원칙을 반드시 지키고 도덕적·윤리적으로 살아가는 것이 나의 자랑스러운 장점이다." },
+    { sym:"④", text:"장기적인 꿈을 향해 꾸준히 노력하고, 타인을 도우면서 함께 성장하는 것이 중요하다." },
+  ]},
+  { n:9, title:"나는 또 어떤 사람인가?", choices:[
+    { sym:"①", text:"말이 앞서고 일을 크게 벌려서 나중에 수습이 어려운 상황이 생기는 경우가 많다." },
+    { sym:"②", text:"자신감과 실행력이 넘쳐 현재 문제를 빠르게 해결하지만, 때로는 뒤에 후회한다." },
+    { sym:"③", text:"해결하지 못한 과거 일에 집착하며, 과거를 놓지 못해 현재에 집중하기 어렵다." },
+    { sym:"④", text:"정이 많고 감수성이 풍부하여, 슬픈 영화를 보면 자신도 모르게 눈물이 난다." },
+  ]},
+  { n:10, title:"나는 노래방에 가면 어떤 식으로 하는가?", choices:[
+    { sym:"①", text:"빠르고 경쾌하며 몸을 흔들며 춤추고 신나게 부를 수 있는 노래를 선호한다." },
+    { sym:"②", text:"강한 음악으로 크게 소리 지르며 에너지를 발산하여 스트레스를 푸는 노래를 좋아한다." },
+    { sym:"③", text:"조용하고 잔잔하며 가사에 깊은 의미가 있고 애절한 감성의 노래를 즐긴다." },
+    { sym:"④", text:"멜로디가 좋은 노래에 먼저 끌리며, 기분에 따라 노래 스타일이 자주 바뀐다." },
+  ]},
+];
+
+// ════════════ 체질 정보 ════════════
+const typeInfo = {
+  '가': {
+    name:'소양인', hanja:'少陽人', color:'#E8651A',
+    keyword:'활동적·사교적·창의적',
+    body:'상체가 발달하고 하체가 약한 편입니다. 열이 많고 더위를 탑니다. 소화는 강하나 신장 기능이 상대적으로 약합니다.',
+    personality:'외향적이고 활발하며 사교성이 뛰어납니다. 추진력과 창의력이 강하지만 마무리가 약한 편입니다.',
+    strength:'창의적 아이디어, 사교성, 추진력, 긍정적 에너지',
+    weakness:'마무리 부족, 과장된 표현, 지속력 약함',
+    food:'돼지고기, 해물, 채소류, 보리, 냉면, 신선한 음식',
+    health:'신장과 방광을 보호하세요. 과로와 스트레스를 피하고 규칙적인 수면이 중요합니다.',
+    tags:['열 체질','상체 발달','사교적','창의적','더위 탐'],
+  },
+  '나': {
+    name:'태양인', hanja:'太陽人', color:'#C0392B',
+    keyword:'독립적·강인한 의지·선구자',
+    body:'목 부위가 발달하고 하체가 약합니다. 폐 기능이 강하고 간 기능이 약해 술을 잘 못합니다.',
+    personality:'강한 의지와 결단력을 가졌으며 독립적이고 주도적입니다. 창의적 사고로 새로운 길을 개척합니다.',
+    strength:'강인한 의지, 독립심, 결단력, 선구자적 기질',
+    weakness:'고집, 독선적 경향, 타협 어려움',
+    food:'새우, 게, 조개류, 소나무 열매, 담백하고 신선한 음식',
+    health:'간 기능 보호가 중요합니다. 과음을 피하고 허리·다리 강화 운동을 권장합니다.',
+    tags:['폐 강함','목 발달','독립적','결단력','술 약함'],
+  },
+  '다': {
+    name:'소음인', hanja:'少陰人', color:'#2471A3',
+    keyword:'꼼꼼·원칙·책임감',
+    body:'하체가 발달하고 상체가 약한 편입니다. 냉한 체질로 소화 기능이 약합니다.',
+    personality:'꼼꼼하고 원칙적이며 책임감이 강합니다. 신중하고 내성적이며 완벽을 추구합니다.',
+    strength:'꼼꼼함, 책임감, 원칙 준수, 인내심, 마무리 능력',
+    weakness:'소극적, 대인관계 좁음, 결정 어려움, 걱정 많음',
+    food:'닭고기, 양고기, 생강, 찹쌀, 따뜻한 음식, 소화 잘 되는 것',
+    health:'비위 보강이 중요합니다. 따뜻하게 지내고 스트레스 관리와 규칙적 식사를 권장합니다.',
+    tags:['냉한 체질','하체 발달','꼼꼼함','원칙적','소화 약함'],
+  },
+  '라': {
+    name:'태음인', hanja:'太陰人', color:'#1E8449',
+    keyword:'중후·배려·끈기',
+    body:'체격이 크고 살이 찌기 쉽습니다. 땀이 많고 간 기능이 강합니다. 폐·호흡기가 약한 편입니다.',
+    personality:'중후하고 배려심이 깊으며 끈기가 있습니다. 보수적이고 신중하며 감수성이 풍부합니다.',
+    strength:'끈기, 배려심, 중후함, 감수성, 포용력',
+    weakness:'우유부단, 고집, 변화 저항, 욕심',
+    food:'쇠고기, 율무, 견과류, 콩류, 영양가 높은 음식',
+    health:'호흡기와 폐 관리가 중요합니다. 규칙적인 운동으로 체중 관리를 하고 변비를 주의하세요.',
+    tags:['땀 많음','살 찌기 쉬움','배려심','끈기','폐 약함'],
+  },
+};
+
+const behaviorInfo = {
+  '①': { name:'소양형', color:'#E8651A', desc:'밝고 활동적인 자유형' },
+  '②': { name:'태양형', color:'#C0392B', desc:'도전적이고 강인한 실행형' },
+  '③': { name:'소음형', color:'#2471A3', desc:'신중하고 원칙적인 완성형' },
+  '④': { name:'태음형', color:'#1E8449', desc:'따뜻하고 배려 깊은 공감형' },
+};
+
+// 체질+행동 조합 해석
+const comboDesc = {
+  '가①': "타고난 열정과 후천적 자유로운 기질이 만나 에너지가 넘치는 유형입니다. 창의적이고 사교적이며 매사 긍정적입니다. 시작을 잘 하지만 마무리에 의식적으로 신경 써야 합니다.",
+  '가②': "소양인의 추진력과 태양형의 강인한 실행력이 결합된 강력한 리더형입니다. 목표를 향해 거침없이 나아가지만, 타인의 감정을 배려하는 연습이 필요합니다.",
+  '가③': "열정적인 소양 체질에 꼼꼼한 소음 성향이 더해진 균형형입니다. 아이디어는 넘치되 실행 전 충분히 검토하는 장점이 있습니다.",
+  '가④': "소양인의 활발함에 태음형의 배려심이 더해진 따뜻한 활동가입니다. 사람을 잘 이끌고 배려하며 함께 성장하는 능력이 뛰어납니다.",
+  '나①': "태양인의 독립적 기질과 소양형의 자유로운 에너지가 결합된 선구자형입니다. 새로운 것에 도전하며 분위기를 이끌어가는 능력이 탁월합니다.",
+  '나②': "태양인의 강인함이 태양형 행동과 일치하는 가장 순수한 리더형입니다. 뚜렷한 신념과 강한 실행력으로 목표를 달성하지만, 유연성도 키워나가야 합니다.",
+  '나③': "태양인의 강인함에 소음형의 원칙이 더해진 완벽주의 리더형입니다. 높은 기준을 추구하며 신뢰받지만, 타인에게도 같은 기준을 요구하지 않도록 주의하세요.",
+  '나④': "태양인의 독립심에 태음형의 배려가 더해진 영적 리더형입니다. 강한 내면의 신념으로 타인을 이끌며 깊은 감수성을 가지고 있습니다.",
+  '다①': "소음인의 꼼꼼함에 소양형의 활발한 에너지가 더해진 내향적 활동가입니다. 신중하게 준비하되 사람과의 관계에서 에너지를 얻는 특별한 조합입니다.",
+  '다②': "소음인의 원칙과 태양형의 실행력이 결합된 완성형 전문가입니다. 맡은 일을 끝까지 해내는 책임감과 추진력을 동시에 갖추었습니다.",
+  '다③': "소음인의 꼼꼼함이 소음형 성향과 일치하는 가장 순수한 완벽주의형입니다. 원칙을 중시하고 책임감이 강하며 신뢰받는 존재입니다. 유연성을 기르는 것이 성장 포인트입니다.",
+  '다④': "소음인의 신중함에 태음형의 따뜻한 배려가 더해진 조용한 봉사자형입니다. 말보다 행동으로 배려를 실천하며 주변을 편안하게 합니다.",
+  '라①': "태음인의 중후함에 소양형의 활발함이 더해진 매력적인 조합입니다. 내면은 깊고 신중하지만 겉으로는 밝고 유머 있게 표현하는 능력이 있습니다.",
+  '라②': "태음인의 끈기와 태양형의 실행력이 결합된 강력한 완성형입니다. 한번 마음먹으면 끝까지 해내는 저력을 가지고 있습니다.",
+  '라③': "태음인의 보수적 신중함과 소음형의 원칙이 만난 가장 신중한 유형입니다. 깊이 있는 분석과 완벽한 마무리로 신뢰를 쌓지만, 때로는 과감한 결단도 필요합니다.",
+  '라④': "태음인의 배려심이 태음형 성향과 일치하는 가장 순수한 공감형입니다. 따뜻하고 포용력이 넘치며 타인의 마음을 잘 이해합니다. 자신의 감정과 욕구도 소중히 하세요.",
+};
+
+// ════════════ 상태 ════════════
+let frontScores = {};   // {문항번호: 점수}
+let backChoices = {};   // {문항번호: '①'|'②'|'③'|'④'}
+
+// ════════════ 렌더링 ════════════
+function renderFront() {
+  const wrap = document.getElementById('q-front');
+  let html = '';
+  let lastCat = '';
+  categories.forEach(cat => {
+    html += `<div class="cat-label">${cat.label}</div>`;
+    frontQuestions.filter(q => q.n >= cat.range[0] && q.n <= cat.range[1]).forEach(q => {
+      html += `
+      <div class="q-card" id="qf-${q.n}">
+        <div class="q-top">
+          <div class="q-num">${q.n}</div>
+          <div class="q-text">${q.text}</div>
+        </div>
+        <div class="score-row">
+          <button class="score-btn" onclick="setFront(${q.n},2,this)">일치<br><strong>2점</strong></button>
+          <button class="score-btn" onclick="setFront(${q.n},1,this)">보통<br><strong>1점</strong></button>
+          <button class="score-btn" onclick="setFront(${q.n},0,this)">불일치<br><strong>0점</strong></button>
+        </div>
+      </div>`;
+    });
+  });
+  wrap.innerHTML = html;
+}
+
+function renderBack() {
+  const wrap = document.getElementById('q-back');
+  let html = '';
+  backQuestions.forEach(q => {
+    html += `<div class="back-q">
+      <div class="back-q-title"><span class="qn">${q.n}</span>${q.title}</div>
+      <div class="back-choices">`;
+    q.choices.forEach((c,i) => {
+      html += `<div class="back-choice" id="bc-${q.n}-${i}" onclick="setBack(${q.n},${i},'${c.sym}')">
+        <div class="choice-sym">${c.sym}</div>
+        <div class="choice-text">${c.text}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+// ════════════ 입력 처리 ════════════
+function setFront(n, score, btn) {
+  frontScores[n] = score;
+  const row = btn.parentElement;
+  row.querySelectorAll('.score-btn').forEach(b => b.className='score-btn');
+  btn.classList.add(`selected-${score}`);
+  updateProg1();
+}
+
+function setBack(qn, idx, sym) {
+  backChoices[qn] = sym;
+  for(let i=0;i<4;i++){
+    const el = document.getElementById(`bc-${qn}-${i}`);
+    if(el) el.classList.remove('selected');
+  }
+  document.getElementById(`bc-${qn}-${idx}`).classList.add('selected');
+  updateProg2();
+}
+
+function updateProg1() {
+  const done = Object.keys(frontScores).length;
+  document.getElementById('prog1-text').textContent = `${done} / 40`;
+  document.getElementById('prog1-fill').style.width = `${done/40*100}%`;
+}
+
+function updateProg2() {
+  const done = Object.keys(backChoices).length;
+  document.getElementById('prog2-text').textContent = `${done} / 10`;
+  document.getElementById('prog2-fill').style.width = `${done/10*100}%`;
+}
+
+// ════════════ 탭 전환 ════════════
+function showTab(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById(`page${i}`).classList.toggle('hidden', i!==n);
+    document.getElementById(`tab${i}`).classList.toggle('active', i===n);
+  });
+}
+
+function goToBack() {
+  const done = Object.keys(frontScores).length;
+  if(done < 40) {
+    if(!confirm(`아직 ${40-done}문항이 남았어요. 그냥 진행할까요?`)) return;
+  }
+  document.getElementById('tab2').disabled = false;
+  showTab(2);
+}
+
+// ════════════ 결과 계산 ════════════
+function showResult() {
+  const done = Object.keys(backChoices).length;
+  if(done < 10) {
+    if(!confirm(`아직 ${10-done}문항이 남았어요. 그냥 결과를 볼까요?`)) return;
+  }
+
+  // 체질 점수 계산
+  const totals = {가:0, 나:0, 다:0, 라:0};
+  frontQuestions.forEach(q => {
+    const s = frontScores[q.n] ?? 0;
+    totals[q.type] += s;
+  });
+  const maxScore = 20; // 각 10문항 × 2점
+  const bodyType = Object.entries(totals).sort((a,b)=>b[1]-a[1])[0][0];
+
+  // 행동유형 집계
+  const bCount = {'①':0,'②':0,'③':0,'④':0};
+  Object.values(backChoices).forEach(v => bCount[v]++);
+  const behaviorType = Object.entries(bCount).sort((a,b)=>b[1]-a[1])[0][0];
+
+  const bi = typeInfo[bodyType];
+  const beh = behaviorInfo[behaviorType];
+  const combo = comboDesc[bodyType+behaviorType] || "두 가지 체질의 특성이 조화를 이루는 독특한 유형입니다.";
+
+  const scoreBar = (key) => {
+    const pct = Math.round(totals[key]/maxScore*100);
+    const info = typeInfo[key];
+    return `<div style="margin-bottom:0.6rem">
+      <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:3px">
+        <span style="font-weight:600;color:${info.color}">${info.name}</span>
+        <span style="color:var(--muted)">${totals[key]}점 (${pct}%)</span>
+      </div>
+      <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${info.color};border-radius:4px;transition:width 0.6s ease"></div>
+      </div>
+    </div>`;
+  };
+
+  document.getElementById('result-area').innerHTML = `
+    <!-- 체질 결과 -->
+    <div class="result-hero" style="background:${bi.color};color:#fff">
+      <div class="result-label">타고난 체질</div>
+      <div class="result-type">${bi.name} ${bi.hanja}</div>
+      <div class="result-sub">${bi.keyword}</div>
+      <div class="score-chips">
+        ${Object.entries(totals).map(([k,v])=>`<span class="score-chip${k===bodyType?' top':''}">${typeInfo[k].name} ${v}점</span>`).join('')}
+      </div>
+    </div>
+
+    <!-- 체질 점수 그래프 -->
+    <div class="result-card" style="margin-bottom:1rem">
+      <h3>체질 점수 분포</h3>
+      ${['가','나','다','라'].map(scoreBar).join('')}
+    </div>
+
+    <!-- 체질 상세 -->
+    <div class="result-cards">
+      <div class="result-card">
+        <h3>신체 특성</h3>
+        <p>${bi.body}</p>
+        <div class="tag-list">
+          ${bi.tags.map(t=>`<span class="tag" style="background:${bi.color}22;color:${bi.color}">${t}</span>`).join('')}
+        </div>
+      </div>
+      <div class="result-card">
+        <h3>성격·기질</h3>
+        <p>${bi.personality}</p>
+      </div>
+      <div class="result-card">
+        <h3>강점</h3>
+        <p>${bi.strength}</p>
+      </div>
+      <div class="result-card">
+        <h3>약점·주의</h3>
+        <p>${bi.weakness}</p>
+      </div>
+      <div class="result-card">
+        <h3>건강 관리</h3>
+        <p>${bi.health}</p>
+      </div>
+      <div class="result-card">
+        <h3>맞는 음식</h3>
+        <p>${bi.food}</p>
+      </div>
+    </div>
+
+    <!-- 행동유형 결과 -->
+    <div style="margin:2rem 0 1rem">
+      <div class="section-head">
+        <span class="badge">PART 2</span>
+        <h2>후천적 행동유형</h2>
+      </div>
+    </div>
+
+    <div class="result-hero" style="background:${beh.color};color:#fff">
+      <div class="result-label">행동 성향</div>
+      <div class="result-type">${beh.name}</div>
+      <div class="result-sub">${beh.desc}</div>
+      <div class="score-chips">
+        ${Object.entries(bCount).map(([k,v])=>`<span class="score-chip${k===behaviorType?' top':''}">${behaviorInfo[k].name} ${v}개</span>`).join('')}
+      </div>
+    </div>
+
+    <!-- 종합 해석 -->
+    <div style="margin:2rem 0 1rem">
+      <div class="section-head">
+        <span class="badge">종합</span>
+        <h2>체질 + 행동유형 종합 해석</h2>
+      </div>
+    </div>
+
+    <div class="combo-box">
+      <h3>🌿 ${bi.name}(체질) × ${beh.name}(행동) 조합</h3>
+      <p>${combo}</p>
+    </div>
+
+    <!-- 4가지 체질 요약 -->
+    <div class="result-card">
+      <h3>4가지 체질 한눈에 보기</h3>
+      <div class="type-grid">
+        ${Object.entries(typeInfo).map(([k,v])=>`
+        <div class="type-mini" style="border-left:4px solid ${v.color}">
+          <h4 style="color:${v.color}">${v.name} ${v.hanja}</h4>
+          <p>${v.keyword}</p>
+        </div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('tab3').disabled = false;
+  showTab(3);
+  window.scrollTo(0,0);
+}
+
+function restart() {
+  frontScores = {};
+  backChoices = {};
+  renderFront();
+  renderBack();
+  updateProg1();
+  updateProg2();
+  document.getElementById('tab2').disabled = true;
+  document.getElementById('tab3').disabled = true;
+  showTab(1);
+  window.scrollTo(0,0);
+}
+
+// ── 초기화 ──
+renderFront();
+renderBack();
+</script>
+</body>
+</html>
